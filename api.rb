@@ -8,11 +8,11 @@ IMAGE_BASE_URL = "http://nhl.cdnllnwnl.neulion.net/u/"
 DAYS_TO_SHOW = 7
 
 class Api < Sinatra::Base
-    
+
     get '/' do
         erb :index
     end
-    
+
     get '/games' do
         today = Date.today
         dates = {}
@@ -20,10 +20,10 @@ class Api < Sinatra::Base
             games = get_games(day)
             dates[day.to_s] = games.map { |g| parse_game(g) }
         end
-    
+
         dates.to_json
     end
-    
+
     def get_games(day)
         cache_key = day.to_s
         games = redis.get(cache_key)
@@ -33,7 +33,7 @@ class Api < Sinatra::Base
             JSON::parse(games)
         end
     end
-    
+
     def parse_game(game)
         {
             state: game['game-state'].first,
@@ -54,7 +54,7 @@ class Api < Sinatra::Base
             }
         }
     end
-    
+
     def parse_team(team)
         {
             name: team['name'].first,
@@ -66,5 +66,7 @@ class Api < Sinatra::Base
             }
         }
     end
+
+    run! if app_file == $0
 
 end
