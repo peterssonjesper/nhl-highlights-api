@@ -9,13 +9,26 @@ SCORES_BASE_URL = "http://www.nhl.com/ice/scores.htm"
 GAME_DATA_BASE_URL = "http://video.nhl.com/videocenter/highlights"
 VIDEO_BASE_URL = "http://video.nhl.com/videocenter/servlets/playlist"
 
-def sync_games(day)
-    day_s = "#{day.month}/#{day.day}/#{day.year}"
-    cache_key = day.to_s
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
 
+def sync
+    today = Date.today
+    ((today-DAYS_TO_SYNC+1)..today).each do |day|
+        begin
+            games = sync_games(day)
+        rescue
+            puts "Failed to fetch games on #{day}"
+        else
+            cache_key = day.to_s
+            redis.set(cache_key, games.to_json)
+        end
+    end
+end
+
+def sync_games(day)
     game_ids = fetch_game_ids(day)
-    games = fetch_games(game_ids)
-    redis.set(cache_key, games.to_json)
+    fetch_games(game_ids)
 end
 
 def fetch_game_ids(day)
@@ -47,22 +60,11 @@ def fetch_video(video_id)
 end
 
 def redis
-    @connection ||= Redis.new(:host => "localhost", :port => 6379)
+    @connection ||= Redis.new(:host => REDIS_HOST, :port => REDIS_PORT)
 end
 
 def http_client
     @client ||= HTTPClient.new
-end
-
-def sync
-    today = Date.today
-    ((today-DAYS_TO_SYNC+1)..today).each do |day|
-        begin
-            games = sync_games(day)
-        rescue
-            puts "Failed to fetch games on #{day}"
-        end
-    end
 end
 
 sync

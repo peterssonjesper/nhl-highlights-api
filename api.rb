@@ -6,7 +6,10 @@ require 'redis'
 IMAGE_BASE_URL = "http://nhl.cdnllnwnl.neulion.net/u/"
 DAYS_TO_SHOW = 7
 
-get '/games' do
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
+
+get '/' do
     today = Date.today
     dates = {}
     ((today-DAYS_TO_SHOW+1)..today).each do |day|
@@ -18,7 +21,6 @@ get '/games' do
 end
 
 def get_games(day)
-    day_s = "#{day.month}/#{day.day}/#{day.year}"
     cache_key = day.to_s
     games = redis.get(cache_key)
     if games.nil?
@@ -62,5 +64,5 @@ def parse_team(team)
 end
 
 def redis
-    @connection ||= Redis.new(:host => "localhost", :port => 6379)
+    @connection ||= Redis.new(:host => REDIS_HOST, :port => REDIS_PORT)
 end
