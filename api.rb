@@ -10,6 +10,10 @@ REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 
 get '/' do
+    erb :index
+end
+
+get '/games' do
     today = Date.today
     dates = {}
     ((today-DAYS_TO_SHOW+1)..today).each do |day|
