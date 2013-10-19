@@ -18,7 +18,7 @@ class Api < Sinatra::Base
         dates = {}
         ((today-DAYS_TO_SHOW+1)..today).each do |day|
             games = get_games(day)
-            dates[day.to_s] = games.map { |g| parse_game(g) }
+            dates[day.to_s] = games.map { |g| parse_game(g) } if games.length > 0
         end
 
         dates.to_json
