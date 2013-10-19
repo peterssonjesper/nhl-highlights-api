@@ -1,16 +1,14 @@
 require 'date'
 require 'json'
-require 'redis'
 require 'httpclient'
 require 'xmlsimple'
+
+require_relative 'redis_connection'
 
 DAYS_TO_SYNC = 7
 SCORES_BASE_URL = "http://www.nhl.com/ice/scores.htm"
 GAME_DATA_BASE_URL = "http://video.nhl.com/videocenter/highlights"
 VIDEO_BASE_URL = "http://video.nhl.com/videocenter/servlets/playlist"
-
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
 
 def sync
     today = Date.today
@@ -57,10 +55,6 @@ def fetch_video(video_id)
     puts "Fetch video #{video_id}"
     video_json = http_client.get_content(VIDEO_BASE_URL, {format: 'json', ids: video_id})
     JSON::parse(video_json).first
-end
-
-def redis
-    @connection ||= Redis.new(:host => REDIS_HOST, :port => REDIS_PORT)
 end
 
 def http_client

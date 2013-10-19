@@ -1,13 +1,11 @@
 require 'date'
 require 'sinatra'
 require 'json'
-require 'redis'
+
+require_relative 'redis_connection'
 
 IMAGE_BASE_URL = "http://nhl.cdnllnwnl.neulion.net/u/"
 DAYS_TO_SHOW = 7
-
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
 
 get '/' do
     erb :index
@@ -65,8 +63,4 @@ def parse_team(team)
             big: team['logo-100px'].first
         }
     }
-end
-
-def redis
-    @connection ||= Redis.new(:host => REDIS_HOST, :port => REDIS_PORT)
 end
