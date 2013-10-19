@@ -10,3 +10,5 @@ mkdir tmp
 mkdir tmp/sockets
 mkdir tmp/pids
 mkdir log
+
+/etc/init.d/nhl restart
