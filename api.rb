@@ -29,7 +29,9 @@ class Api < Sinatra::Base
 
     def get_game_ids(day)
         key = day.to_s
-        redis.lrange("date:#{key}:gameid", 0, -1)
+        ids = redis.lrange("date:#{key}:gameid", 0, -1)
+        return [] if ids.nil?
+        ids
     end
 
     def get_game(game_id)
