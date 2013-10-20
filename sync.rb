@@ -4,6 +4,7 @@ require 'date'
 require 'json'
 require 'httpclient'
 require 'xmlsimple'
+require 'nokogiri'
 
 require_relative 'redis_connection'
 
@@ -20,10 +21,36 @@ def sync
         rescue
             puts "Failed to fetch games on #{day}"
         else
-            cache_key = day.to_s
-            redis.set(cache_key, games.to_json)
+            games.each do |game|
+                if !redis.exists(game_id_key(game))
+                    redis.set(game_id_key(game), game.to_json)
+                    redis.rpush(date_key(day), game_id(game))
+                    redis.rpush(team_away_key(game), game_id(game))
+                    redis.rpush(team_home_key(game), game_id(game))
+                end
+            end
         end
     end
+end
+
+def game_id(game)
+    "#{game['season'].first},#{game['game-type'].first},#{game['game-number'].first}"
+end
+
+def game_id_key(game)
+    "gameid:#{game_id(game)}:game"
+end
+
+def team_away_key(game)
+    "team:#{game['away-team'].first['team-abbreviation'].first}:gameid"
+end
+
+def team_home_key(game)
+    "team:#{game['home-team'].first['team-abbreviation'].first}:gameid"
+end
+
+def date_key(day)
+    "date:#{day.to_s}:gameid"
 end
 
 def sync_games(day)
@@ -35,7 +62,10 @@ def fetch_game_ids(day)
     puts "Fetch game IDs on #{day}"
     day_s = "#{day.month}/#{day.day}/#{day.year}"
     scores_html = http_client.get_content(SCORES_BASE_URL, { date: day_s})
-    scores_html.scan(/hlg=([0-9,]+)/).map {|x| x.first }
+    page = page = Nokogiri::HTML(scores_html)
+    page.css('#scoresBody a[href *= "?hlg="]').map do |a|
+        a.attributes['href'].value.match(/hlg=([0-9,]+)/)[1]
+    end
 end
 
 def fetch_games(hlg_ids)

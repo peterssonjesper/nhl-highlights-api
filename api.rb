@@ -17,21 +17,25 @@ class Api < Sinatra::Base
         today = Date.today
         dates = {}
         ((today-DAYS_TO_SHOW+1)..today).each do |day|
-            games = get_games(day)
-            dates[day.to_s] = games.map { |g| parse_game(g) } if games.length > 0
+            game_ids = get_game_ids(day)
+            games = game_ids.map do |id|
+                get_game(id)
+            end
+            dates[day.to_s] = games if games.length > 0
         end
 
         dates.to_json
     end
 
-    def get_games(day)
-        cache_key = day.to_s
-        games = redis.get(cache_key)
-        if games.nil?
-            []
-        else
-            JSON::parse(games)
-        end
+    def get_game_ids(day)
+        key = day.to_s
+        redis.lrange("date:#{key}:gameid", 0, -1)
+    end
+
+    def get_game(game_id)
+        game_s = redis.get("gameid:#{game_id}:game")
+        game = JSON::parse(game_s)
+        parse_game(game)
     end
 
     def parse_game(game)
