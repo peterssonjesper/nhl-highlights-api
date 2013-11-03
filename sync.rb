@@ -8,7 +8,7 @@ require 'nokogiri'
 
 require_relative 'redis_connection'
 
-DAYS_TO_SYNC = 7
+DAYS_TO_SYNC = 15
 SCORES_BASE_URL = "http://www.nhl.com/ice/scores.htm"
 GAME_DATA_BASE_URL = "http://video.nhl.com/videocenter/highlights"
 VIDEO_BASE_URL = "http://video.nhl.com/videocenter/servlets/playlist"
