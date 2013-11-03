@@ -1,6 +1,4 @@
-require 'date'
 require 'sinatra'
-require 'json'
 
 class Api < Sinatra::Base
 
